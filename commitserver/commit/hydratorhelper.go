@@ -145,9 +145,6 @@ func writeManifests(dirPath string, manifests []*apiclient.ManifestDetails) erro
 			return fmt.Errorf("failed to encode manifest: %w", err)
 		}
 		mYaml := buf.Bytes()
-		if err != nil {
-			return fmt.Errorf("failed to marshal manifest: %w", err)
-		}
 		mYaml = append(mYaml, []byte("\n---\n\n")...)
 		// Write the yaml to manifest.yaml
 		_, err = file.Write(mYaml)
