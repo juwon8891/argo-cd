@@ -8,40 +8,7 @@ before:
     - make build-ui
 
 builds:
-  - id: argocd-cli
-    main: ./cmd
-    binary: argocd-{{ .Os}}-{{ .Arch}}
-    env:
-      - CGO_ENABLED=0
-    flags:
-      - -v
-    ldflags:
-      - -X github.com/argoproj/argo-cd/v2/common.version={{ .Version }}
-      - -X github.com/argoproj/argo-cd/v2/common.buildDate={{ .Date }}
-      - -X github.com/argoproj/argo-cd/v2/common.gitCommit={{ .FullCommit }}
-      - -X github.com/argoproj/argo-cd/v2/common.gitTreeState={{ .Env.GIT_TREE_STATE }}
-      - -X github.com/argoproj/argo-cd/v2/common.kubectlVersion={{ .Env.KUBECTL_VERSION }}
-      - -extldflags="-static"
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
-      - s390x
-      - ppc64le
-    ignore:
-      - goos: darwin
-        goarch: s390x
-      - goos: darwin
-        goarch: ppc64le
-      - goos: windows
-        goarch: s390x
-      - goos: windows
-        goarch: ppc64le
-      - goos: windows
-        goarch: arm64
+  - skip: true
 
 archives:
   - id: argocd-archive
