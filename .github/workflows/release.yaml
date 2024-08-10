@@ -29,20 +29,20 @@ jobs:
         run: |
           set -xue
 
-          if echo ${{ github.ref_name }} | grep -E -- '-rc1+$';then
-            echo "GORELEASER_PREVIOUS_TAG=$(git -c 'versionsort.suffix=-rc' tag --list --sort=version:refname | tail -n 2 | head -n 1)" >> $GITHUB_ENV
-          else
-            echo "This is not the first release on the branch, Using GoReleaser defaults"
-          fi
-          # RC 릴리즈인지 확인
-          # if echo ${{ github.ref_name }} | grep -E -- '-rc[0-9]+$'; then
-          #   # 이전 태그 중 마지막 RC 또는 Stable 태그를 선택
+          # if echo ${{ github.ref_name }} | grep -E -- '-rc1+$';then
           #   echo "GORELEASER_PREVIOUS_TAG=$(git -c 'versionsort.suffix=-rc' tag --list --sort=version:refname | tail -n 2 | head -n 1)" >> $GITHUB_ENV
           # else
-          #   # Stable 릴리즈인 경우, 마지막 Stable 태그를 선택
-          #   LAST_STABLE_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-          #   echo "GORELEASER_PREVIOUS_TAG=$LAST_STABLE_TAG" >> $GITHUB_ENV
+          #   echo "This is not the first release on the branch, Using GoReleaser defaults"
           # fi
+          RC 릴리즈인지 확인
+          if echo ${{ github.ref_name }} | grep -E -- '-rc[0-9]+$'; then
+            # 이전 태그 중 마지막 RC 또는 Stable 태그를 선택
+            echo "GORELEASER_PREVIOUS_TAG=$(git -c 'versionsort.suffix=-rc' tag --list --sort=version:refname | tail -n 2 | head -n 1)" >> $GITHUB_ENV
+          else
+            # Stable 릴리즈인 경우, 마지막 Stable 태그를 선택
+            LAST_STABLE_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            echo "GORELEASER_PREVIOUS_TAG=$LAST_STABLE_TAG" >> $GITHUB_ENV
+          fi
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
