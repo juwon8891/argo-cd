@@ -58,8 +58,8 @@ release:
 
 snapshot: #### To be removed for PR
   name_template: "2.6.0"
-
-changelog:
+#
+changelog: 
   use:
     github
   sort: asc
