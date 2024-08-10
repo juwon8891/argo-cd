@@ -34,7 +34,7 @@ jobs:
           # else
           #   echo "This is not the first release on the branch, Using GoReleaser defaults"
           # fi
-          RC 릴리즈인지 확인
+          #RC 릴리즈인지 확인
           if echo ${{ github.ref_name }} | grep -E -- '-rc[0-9]+$'; then
             # 이전 태그 중 마지막 RC 또는 Stable 태그를 선택
             echo "GORELEASER_PREVIOUS_TAG=$(git -c 'versionsort.suffix=-rc' tag --list --sort=version:refname | tail -n 2 | head -n 1)" >> $GITHUB_ENV
