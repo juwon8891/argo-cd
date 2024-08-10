@@ -4,8 +4,8 @@ project_name: argocd
 
 before:
   hooks:
-    - go mod download
-    - make build-ui
+    # - go mod download
+    # - make build-ui
 
 builds:
   - skip: true
