@@ -7,7 +7,7 @@ before:
     # - go mod download
     # - make build-ui
     #
-    #
+    
 builds:
   - skip: true
 
