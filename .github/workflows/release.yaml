@@ -28,27 +28,35 @@ jobs:
         run: |
           set -xue
       
-          # 현재 태그가 RC인지 확인
-          if echo ${{ github.ref_name }} | grep -E -- '-rc[0-9]+$'; then
-            # RC 태그라면, 바로 이전 태그를 찾음
-            PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$' | grep -v "^${{ github.ref_name }}" | head -n 1)
-          else
-            # 정식 릴리즈라면, 이전 마이너 버전의 마지막 태그 찾기
-            CURRENT_VERSION=$(echo ${{ github.ref_name }} | grep -oP '^v\K[0-9]+\.[0-9]+')
-            MAJOR_VERSION=$(echo $CURRENT_VERSION | cut -d'.' -f1)
-            MINOR_VERSION=$(echo $CURRENT_VERSION | cut -d'.' -f2)
+          # 현재 태그에서 주 버전과 부 버전, 패치 버전 추출 (예: v2.13.1 -> 2, 13, 1)
+          CURRENT_TAG=${{ github.ref_name }}
+          MAJOR_VERSION=$(echo $CURRENT_TAG | cut -d'.' -f1 | cut -d'v' -f2)
+          MINOR_VERSION=$(echo $CURRENT_TAG | cut -d'.' -f2)
+          PATCH_VERSION=$(echo $CURRENT_TAG | cut -d'.' -f3 | cut -d'-' -f1)
       
+          if [ "$PATCH_VERSION" -gt 0 ]; then
+            # 패치 릴리스라면, 같은 마이너 버전의 마지막 태그 찾기 (예: v2.13.1 -> v2.13.0)
+            PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E "^v${MAJOR_VERSION}\.${MINOR_VERSION}\.[0-9]+$" | grep -v "^${CURRENT_TAG}$" | head -n 1)
+          else
+            # 새로운 마이너 버전 릴리스라면, 이전 마이너 버전의 마지막 태그 찾기 (예: v2.14.0 -> v2.13.x)
             if [ "$MINOR_VERSION" -gt 0 ]; then
               PREVIOUS_MINOR_VERSION=$((MINOR_VERSION - 1))
-              # 이전 마이너 버전의 마지막 태그 찾기 (예: v2.12.x)
               PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E "^v${MAJOR_VERSION}\.${PREVIOUS_MINOR_VERSION}\.[0-9]+$" | head -n 1)
             fi
-      
-            # 만약 이전 마이너 버전 태그가 없을 경우, 가장 최근의 이전 버전 태그를 찾음
-            if [ -z "$PREVIOUS_TAG" ]; then
-              PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | grep -vE "^v${MAJOR_VERSION}\.${MINOR_VERSION}\.[0-9]+$" | head -n 1)
-            fi
           fi
+      
+          # 만약 태그를 찾지 못한 경우, 이전 메이저 버전의 가장 최근 태그를 찾기
+          if [ -z "$PREVIOUS_TAG" ]; then
+            PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | grep -vE "^${CURRENT_TAG}$" | head -n 1)
+          fi
+      
+          # GORELEASER_PREVIOUS_TAG 설정
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "GORELEASER_PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
+          else
+            echo "No previous tag found, using GoReleaser defaults."
+          fi
+      
       
           # GORELEASER_PREVIOUS_TAG 설정
           if [ -n "$PREVIOUS_TAG" ]; then
